@@ -1,0 +1,1391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The Inner Atlas</title>
+  <meta name="description" content="The Inner Atlas — a landscape of poems, questions, and shifting light." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500;1,600&family=Inter:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    /* ─── Design Tokens ─── */
+    :root {
+      --background:       hsl(45, 38%, 96%);
+      --foreground:       hsl(220, 20%, 16%);
+      --card:             hsl(44, 35%, 98%);
+      --card-foreground:  hsl(220, 20%, 16%);
+      --primary:          hsl(212, 28%, 40%);
+      --primary-fg:       hsl(45, 38%, 96%);
+      --secondary:        hsl(38, 22%, 88%);
+      --secondary-fg:     hsl(220, 20%, 16%);
+      --muted:            hsl(40, 18%, 91%);
+      --muted-fg:         hsl(220, 12%, 48%);
+      --accent:           hsl(348, 20%, 66%);
+      --accent-fg:        hsl(220, 20%, 16%);
+      --destructive:      hsl(0, 72%, 51%);
+      --border:           hsl(38, 18%, 84%);
+      --font-display:     "Cormorant Garamond", Georgia, serif;
+      --font-body:        "Inter", system-ui, sans-serif;
+      --shadow-soft:      0 4px 32px -4px hsl(220 20% 16% / 0.07);
+      --shadow-card:      0 2px 16px -2px hsl(220 20% 16% / 0.05);
+      --radius:           0.375rem;
+    }
+    /* ─── Reset & Base ─── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--background);
+      color: var(--foreground);
+      font-family: var(--font-body);
+      font-weight: 300;
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+    }
+    h1,h2,h3,h4,h5,h6 { font-family: var(--font-display); }
+    a { text-decoration: none; color: inherit; }
+    button { cursor: pointer; background: none; border: none; font-family: inherit; }
+    textarea, input { font-family: inherit; }
+    /* ─── Utilities ─── */
+    .font-display   { font-family: var(--font-display); }
+    .font-body      { font-family: var(--font-body); }
+    .italic         { font-style: italic; }
+    .text-center    { text-align: center; }
+    .text-muted     { color: var(--muted-fg); }
+    .text-accent    { color: var(--accent); }
+    .text-primary   { color: var(--primary); }
+    .text-fg        { color: var(--foreground); }
+    .text-fg-80     { color: hsl(220 20% 16% / 0.8); }
+    .tracking-wide  { letter-spacing: 0.05em; }
+    .tracking-wider { letter-spacing: 0.1em; }
+    .tracking-widest{ letter-spacing: 0.2em; }
+    .tracking-ultra { letter-spacing: 0.3em; }
+    .uppercase      { text-transform: uppercase; }
+    .poem-text {
+      font-family: var(--font-display);
+      font-weight: 300;
+      font-style: italic;
+      line-height: 2.1;
+      letter-spacing: 0.015em;
+    }
+    /* ─── Layout ─── */
+    .container      { max-width: 1200px; margin: 0 auto; padding: 0 1.5rem; }
+    .container-sm   { max-width: 680px;  margin: 0 auto; padding: 0 1.5rem; }
+    .container-md   { max-width: 900px;  margin: 0 auto; padding: 0 1.5rem; }
+    .main-pad       { padding-top: 8rem; padding-bottom: 4rem; }
+    /* ─── Page enter animation ─── */
+    .page {
+      display: none;
+      animation: pageEnter 0.45s ease-out forwards;
+    }
+    .page.active { display: block; }
+    @keyframes pageEnter {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0);    }
+    }
+    /* ─── Divider ornament ─── */
+    .divider {
+      width: 2.5rem; height: 1px;
+      background: var(--accent);
+      margin: 0 auto;
+    }
+    .divider-border {
+      width: 2rem; height: 1px;
+      background: var(--border);
+      margin: 0 auto;
+    }
+    /* ─── Navigation ─── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0;
+      z-index: 100;
+      background: hsl(45 38% 96% / 0.92);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-inner {
+      max-width: 1200px; margin: 0 auto;
+      padding: 1.1rem 1.5rem;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .nav-brand {
+      font-family: var(--font-display);
+      font-size: 1.15rem; font-weight: 300; letter-spacing: 0.06em;
+      color: var(--foreground);
+    }
+    .nav-links {
+      display: flex; align-items: center; gap: 2rem;
+    }
+    .nav-link {
+      font-family: var(--font-body);
+      font-size: 0.65rem; font-weight: 400;
+      letter-spacing: 0.22em; text-transform: uppercase;
+      color: var(--muted-fg);
+      transition: color 0.25s;
+    }
+    .nav-link:hover, .nav-link.active-link { color: var(--foreground); }
+    .nav-hamburger { display: none; flex-direction: column; gap: 5px; padding: 4px; }
+    .nav-hamburger span { display: block; width: 20px; height: 1px; background: var(--foreground); }
+    .mobile-menu {
+      display: none; flex-direction: column; gap: 0;
+      background: var(--card); border-top: 1px solid var(--border);
+      padding: 0.5rem 0;
+    }
+    .mobile-menu.open { display: flex; }
+    .mobile-menu a {
+      padding: 0.75rem 1.5rem;
+      font-family: var(--font-body); font-size: 0.7rem;
+      letter-spacing: 0.2em; text-transform: uppercase;
+      color: var(--muted-fg); transition: color 0.2s;
+    }
+    .mobile-menu a:hover { color: var(--foreground); }
+    @media (max-width: 640px) {
+      .nav-links { display: none; }
+      .nav-hamburger { display: flex; }
+    }
+    /* ─── Footer ─── */
+    footer {
+      border-top: 1px solid var(--border);
+      margin-top: 6rem;
+      padding: 2.5rem 1.5rem;
+    }
+    .footer-inner {
+      max-width: 1200px; margin: 0 auto;
+      display: flex; flex-wrap: wrap;
+      align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .footer-links { display: flex; gap: 1.5rem; }
+    .footer-link {
+      font-family: var(--font-body); font-size: 0.65rem;
+      letter-spacing: 0.2em; text-transform: uppercase;
+      color: var(--muted-fg); transition: color 0.2s;
+    }
+    .footer-link:hover { color: var(--foreground); }
+    /* ─── Buttons ─── */
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
+      font-family: var(--font-body); font-size: 0.65rem;
+      letter-spacing: 0.2em; text-transform: uppercase;
+      border-radius: var(--radius); transition: all 0.3s; cursor: pointer;
+    }
+    .btn-dark {
+      background: var(--foreground); color: var(--background);
+      padding: 0.75rem 1.75rem; border: 1px solid var(--foreground);
+    }
+    .btn-dark:hover { background: var(--primary); border-color: var(--primary); }
+    .btn-dark:disabled { opacity: 0.3; cursor: not-allowed; }
+    .btn-outline {
+      background: transparent; color: var(--muted-fg);
+      padding: 0.7rem 1.5rem; border: 1px solid var(--border);
+    }
+    .btn-outline:hover { color: var(--foreground); border-color: hsl(220 20% 16% / 0.5); }
+    .btn-ghost {
+      background: transparent; color: var(--muted-fg); padding: 0.5rem;
+    }
+    .btn-ghost:hover { color: var(--foreground); }
+    /* ─── Card ─── */
+    .card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-card);
+    }
+    /* ─── Tags ─── */
+    .tag {
+      font-family: var(--font-body); font-size: 0.7rem;
+      letter-spacing: 0.06em; padding: 0.3rem 0.9rem;
+      border-radius: 9999px; border: 1px solid var(--border);
+      color: var(--muted-fg); background: transparent;
+      cursor: pointer; transition: all 0.25s;
+    }
+    .tag:hover, .tag.active {
+      background: var(--foreground); color: var(--background);
+      border-color: var(--foreground);
+    }
+    /* ─── Input / Textarea ─── */
+    .field {
+      width: 100%; background: var(--card);
+      border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 0.75rem 1rem;
+      font-family: var(--font-body); font-size: 0.875rem;
+      color: var(--foreground); outline: none;
+      transition: border-color 0.3s;
+    }
+    .field::placeholder { color: hsl(220 12% 48% / 0.6); }
+    .field:focus { border-color: hsl(212 28% 40% / 0.6); }
+    .field-display {
+      font-family: var(--font-display); font-style: italic; font-size: 1.125rem;
+    }
+    textarea.field { resize: vertical; line-height: 1.8; }
+    /* ─── Page header ─── */
+    .page-header { text-align: center; margin-bottom: 3.5rem; }
+    .page-eyebrow {
+      font-family: var(--font-body); font-size: 0.65rem;
+      letter-spacing: 0.3em; text-transform: uppercase;
+      color: var(--muted-fg); margin-bottom: 1rem;
+      display: block;
+    }
+    .page-title {
+      font-family: var(--font-display); font-weight: 300;
+      font-size: clamp(2.5rem, 5vw, 3.75rem);
+      color: var(--foreground); margin-bottom: 1.25rem;
+    }
+    .page-sub {
+      font-family: var(--font-display); font-style: italic;
+      color: var(--muted-fg); font-size: 1rem; line-height: 1.7;
+    }
+    /* ══════════════════════════════════════════
+       HOME PAGE
+    ══════════════════════════════════════════ */
+    #page-home { min-height: 100vh; }
+    .hero {
+      position: relative; min-height: 100vh;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      overflow: hidden;
+    }
+    .hero-bg {
+      position: absolute; inset: 0;
+      background:
+        linear-gradient(180deg, hsl(210 22% 75% / 0.35) 0%, hsl(220 18% 65% / 0.25) 100%),
+        linear-gradient(135deg, hsl(45 38% 92%) 0%, hsl(210 22% 86%) 50%, hsl(220 20% 82%) 100%);
+    }
+    .hero-overlay {
+      position: absolute; inset: 0;
+      background: hsl(45 38% 96% / 0.55);
+    }
+    .hero-content {
+      position: relative; z-index: 10;
+      text-align: center; padding: 2rem 1.5rem;
+      max-width: 640px; margin: 0 auto;
+      animation: pageEnter 0.8s ease-out forwards;
+    }
+    .hero-title {
+      font-family: var(--font-display); font-weight: 300;
+      font-size: clamp(3rem, 8vw, 5.5rem);
+      color: var(--foreground); margin-bottom: 2rem; line-height: 1.1;
+    }
+    .hero-intro {
+      font-family: var(--font-display); font-style: italic;
+      font-size: clamp(1rem, 2.5vw, 1.25rem);
+      color: hsl(220 20% 16% / 0.8); line-height: 1.8; margin-bottom: 1rem;
+    }
+    .hero-sub {
+      font-family: var(--font-display); font-style: italic;
+      font-size: clamp(0.9rem, 2vw, 1.1rem);
+      color: var(--muted-fg); line-height: 1.8; margin-bottom: 3rem;
+    }
+    .hero-scroll {
+      position: absolute; bottom: 2.5rem; left: 50%; transform: translateX(-50%);
+      animation: bounce 2s infinite;
+    }
+    .hero-scroll-line { width: 1px; height: 2.5rem; background: hsl(220 20% 16% / 0.2); margin: 0 auto; }
+    @keyframes bounce {
+      0%,100% { transform: translateX(-50%) translateY(0); }
+      50%      { transform: translateX(-50%) translateY(6px); }
+    }
+    .nav-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 1.25rem; padding: 4rem 0;
+    }
+    .nav-card {
+      padding: 2rem; background: var(--card);
+      border: 1px solid var(--border); border-radius: var(--radius);
+      box-shadow: var(--shadow-card); text-align: center;
+      transition: all 0.35s; cursor: pointer;
+    }
+    .nav-card:hover {
+      box-shadow: var(--shadow-soft);
+      border-color: hsl(212 28% 40% / 0.3);
+    }
+    .nav-card:hover .nav-card-title { color: var(--primary); }
+    .nav-card-symbol { font-family: var(--font-display); font-size: 1.5rem; color: var(--accent); margin-bottom: 1rem; }
+    .nav-card-title { font-family: var(--font-display); font-size: 1.25rem; color: var(--foreground); margin-bottom: 0.5rem; transition: color 0.3s; }
+    .nav-card-desc { font-family: var(--font-display); font-style: italic; font-size: 0.875rem; color: var(--muted-fg); line-height: 1.6; }
+    /* ══════════════════════════════════════════
+       POEMS PAGE
+    ══════════════════════════════════════════ */
+    .tag-bar { display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center; margin-bottom: 3.5rem; }
+    .poems-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem; }
+    .poem-card {
+      padding: 2rem 2rem 1.75rem; background: var(--card);
+      border: 1px solid var(--border); border-radius: var(--radius);
+      box-shadow: var(--shadow-card); cursor: pointer;
+      transition: all 0.35s; display: flex; flex-direction: column;
+    }
+    .poem-card:hover { box-shadow: var(--shadow-soft); border-color: hsl(212 28% 40% / 0.25); transform: translateY(-2px); }
+    .poem-card-title { font-family: var(--font-display); font-size: 1.35rem; font-weight: 400; color: var(--foreground); margin-bottom: 0.35rem; }
+    .poem-card:hover .poem-card-title { color: var(--primary); }
+    .poem-card-date { font-family: var(--font-body); font-size: 0.65rem; letter-spacing: 0.15em; color: var(--muted-fg); text-transform: uppercase; margin-bottom: 1rem; }
+    .poem-card-excerpt {
+      font-family: var(--font-display); font-style: italic;
+      font-size: 0.9rem; color: var(--muted-fg); line-height: 1.8;
+      display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden;
+      flex: 1;
+    }
+    .poem-card-tags { display: flex; flex-wrap: wrap; gap: 0.35rem; margin-top: 1.25rem; }
+    .poem-tag-pill {
+      font-family: var(--font-body); font-size: 0.6rem;
+      letter-spacing: 0.08em; padding: 0.2rem 0.65rem;
+      border-radius: 9999px; border: 1px solid var(--border);
+      color: var(--muted-fg); background: var(--muted);
+    }
+    .poem-read-hint {
+      margin-top: 1.25rem; padding-top: 1rem;
+      border-top: 1px solid var(--border);
+      font-family: var(--font-body); font-size: 0.6rem;
+      letter-spacing: 0.15em; text-transform: uppercase;
+      color: var(--muted-fg); opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .poem-card:hover .poem-read-hint { opacity: 1; }
+    /* ══════════════════════════════════════════
+       POEM DETAIL PAGE
+    ══════════════════════════════════════════ */
+    #page-poem-detail { min-height: 100vh; }
+    .poem-detail-header { text-align: center; margin-bottom: 3rem; }
+    .poem-detail-title {
+      font-family: var(--font-display); font-weight: 300;
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      color: var(--foreground); margin-bottom: 1rem;
+    }
+    .poem-detail-meta {
+      font-family: var(--font-body); font-size: 0.65rem;
+      letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted-fg);
+    }
+    .poem-detail-body {
+      font-family: var(--font-display); font-style: italic;
+      font-weight: 300; font-size: clamp(1.1rem, 2.5vw, 1.3rem);
+      line-height: 2.1; letter-spacing: 0.015em;
+      color: var(--foreground); white-space: pre-wrap;
+      max-width: 540px; margin: 0 auto 3rem;
+    }
+    .poem-nav-buttons { display: flex; gap: 1rem; justify-content: center; margin-top: 3rem; }
+    /* ══════════════════════════════════════════
+       JOURNAL PAGE
+    ══════════════════════════════════════════ */
+    .journal-textarea-wrap {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 1.5rem;
+      box-shadow: var(--shadow-card);
+      transition: border-color 0.3s;
+    }
+    .journal-textarea-wrap:focus-within { border-color: hsl(212 28% 40% / 0.5); }
+    .journal-textarea {
+      width: 100%; background: transparent;
+      font-family: var(--font-display); font-style: italic;
+      font-size: 1.125rem; color: var(--foreground);
+      border: none; outline: none; resize: none; line-height: 1.8;
+    }
+    .journal-textarea::placeholder { color: hsl(220 12% 48% / 0.55); }
+    .journal-footer {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-top: 1rem; padding-top: 1rem;
+      border-top: 1px solid var(--border);
+    }
+    .journal-hint { font-family: var(--font-body); font-size: 0.7rem; color: var(--muted-fg); }
+    .entry-card {
+      padding: 1.5rem; background: var(--card);
+      border: 1px solid var(--border); border-radius: var(--radius);
+      box-shadow: var(--shadow-card); margin-bottom: 1.25rem;
+    }
+    .entry-text {
+      font-family: var(--font-display); font-style: italic;
+      font-size: 1.125rem; color: var(--foreground); line-height: 1.7;
+      margin-bottom: 0.75rem;
+    }
+    .entry-date { font-family: var(--font-body); font-size: 0.65rem; letter-spacing: 0.12em; color: var(--muted-fg); }
+    /* ══════════════════════════════════════════
+       DAILY QUESTION PAGE
+    ══════════════════════════════════════════ */
+    .question-card-wrap { position: relative; margin-bottom: 4rem; }
+    .question-ornament-tl {
+      position: absolute; top: -1rem; left: -1rem;
+      width: 2.5rem; height: 2.5rem; border-radius: 50%;
+      border: 1px solid hsl(348 20% 66% / 0.3);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .question-ornament-br {
+      position: absolute; bottom: -1rem; right: -1rem;
+      width: 2.5rem; height: 2.5rem; border-radius: 50%;
+      border: 1px solid var(--border);
+    }
+    .question-card {
+      padding: 3.5rem 2rem; background: var(--card);
+      border: 1px solid var(--border); border-radius: var(--radius);
+      box-shadow: var(--shadow-soft); text-align: center;
+      transition: opacity 0.35s;
+    }
+    .question-text {
+      font-family: var(--font-display); font-weight: 300;
+      font-size: clamp(1.3rem, 3vw, 1.9rem);
+      color: var(--foreground); line-height: 1.6;
+    }
+    @media (min-width: 640px) { .question-card { padding: 4rem 3.5rem; } }
+    /* ══════════════════════════════════════════
+       MEANING BUILDER PAGE
+    ══════════════════════════════════════════ */
+    .concept-grid { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+    .concept-btn {
+      font-family: var(--font-display); font-size: 1rem;
+      padding: 0.5rem 1rem; border-radius: var(--radius);
+      border: 1px solid var(--border); color: var(--muted-fg);
+      background: transparent; cursor: pointer; transition: all 0.25s;
+    }
+    .concept-btn:hover { border-color: hsl(220 20% 16% / 0.4); color: var(--foreground); }
+    .concept-btn.selected { background: var(--foreground); color: var(--background); border-color: var(--foreground); }
+    .definition-label { font-family: var(--font-display); font-size: 0.875rem; color: var(--muted-fg); margin-bottom: 0.75rem; display: block; }
+    .definition-card {
+      padding: 1.5rem; background: var(--card);
+      border: 1px solid var(--border); border-radius: var(--radius);
+      box-shadow: var(--shadow-card); margin-bottom: 1.25rem;
+    }
+    .definition-concept { font-family: var(--font-display); font-size: 0.875rem; color: var(--accent); margin-bottom: 0.75rem; display: block; }
+    .definition-text { font-family: var(--font-display); font-style: italic; font-size: 1rem; color: var(--foreground); line-height: 1.7; }
+    /* ══════════════════════════════════════════
+       ABOUT PAGE
+    ══════════════════════════════════════════ */
+    .about-avatar {
+      width: 6rem; height: 6rem; border-radius: 50%;
+      border: 1px solid var(--border); background: var(--secondary);
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 3.5rem;
+    }
+    .about-avatar span { font-family: var(--font-display); font-size: 1.875rem; color: var(--muted-fg); font-style: italic; }
+    .about-text { font-family: var(--font-display); font-size: 1rem; color: hsl(220 20% 16% / 0.8); line-height: 1.9; margin-bottom: 1.25rem; }
+    .about-quote { font-family: var(--font-display); font-style: italic; color: var(--muted-fg); font-size: 0.875rem; line-height: 1.7; text-align: center; }
+    /* ══════════════════════════════════════════
+       ADMIN PAGE
+    ══════════════════════════════════════════ */
+    .admin-login {
+      min-height: 100vh; display: flex;
+      align-items: center; justify-content: center; padding: 1.5rem;
+    }
+    .admin-login-box { width: 100%; max-width: 360px; }
+    .admin-row {
+      display: flex; align-items: center;
+      justify-content: space-between; margin-bottom: 2.5rem; gap: 1rem; flex-wrap: wrap;
+    }
+    .admin-poem-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1.25rem; background: var(--card);
+      border: 1px solid var(--border); border-radius: var(--radius);
+      box-shadow: var(--shadow-card); margin-bottom: 0.75rem;
+      transition: border-color 0.25s; gap: 1rem;
+    }
+    .admin-poem-row:hover { border-color: hsl(212 28% 40% / 0.2); }
+    .admin-poem-info { flex: 1; min-width: 0; }
+    .admin-poem-title { font-family: var(--font-display); font-size: 1.125rem; color: var(--foreground); }
+    .admin-poem-meta { font-family: var(--font-body); font-size: 0.65rem; letter-spacing: 0.12em; color: var(--muted-fg); margin-top: 0.25rem; }
+    .admin-poem-actions { display: flex; align-items: center; gap: 0.5rem; }
+    .draft-pill {
+      font-family: var(--font-body); font-size: 0.6rem; letter-spacing: 0.08em;
+      padding: 0.15rem 0.6rem; border-radius: 9999px;
+      background: hsl(348 20% 66% / 0.12); color: var(--accent);
+    }
+    .form-label { font-family: var(--font-body); font-size: 0.65rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted-fg); display: block; margin-bottom: 0.5rem; }
+    .form-group { margin-bottom: 1.5rem; }
+    .tags-row { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.75rem; }
+    .tag-chip {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      font-family: var(--font-body); font-size: 0.7rem;
+      padding: 0.35rem 0.75rem; border-radius: 9999px;
+      background: var(--secondary); color: var(--secondary-fg); border: none;
+    }
+    .tag-chip-remove { color: var(--muted-fg); cursor: pointer; line-height: 1; }
+    .tag-chip-remove:hover { color: var(--destructive); }
+    .tag-input-row { display: flex; gap: 0.5rem; }
+    .draft-toggle {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      font-family: var(--font-body); font-size: 0.7rem;
+      padding: 0.5rem 1rem; border-radius: var(--radius);
+      border: 1px solid var(--border); color: var(--muted-fg);
+      background: transparent; cursor: pointer; transition: all 0.25s;
+    }
+    .draft-toggle.is-draft { border-color: hsl(348 20% 66% / 0.5); color: var(--accent); background: hsl(348 20% 66% / 0.08); }
+    .form-actions { display: flex; gap: 0.75rem; padding-top: 0.5rem; }
+    .delete-confirm { display: flex; align-items: center; gap: 0.75rem; }
+    .btn-confirm { font-family: var(--font-body); font-size: 0.7rem; color: var(--destructive); background: none; border: none; cursor: pointer; }
+    .btn-confirm:hover { text-decoration: underline; }
+    .btn-cancel-sm { font-family: var(--font-body); font-size: 0.7rem; color: var(--muted-fg); background: none; border: none; cursor: pointer; }
+    .btn-cancel-sm:hover { color: var(--foreground); }
+    .error-msg { font-family: var(--font-body); font-size: 0.7rem; color: var(--destructive); text-align: center; }
+    .saved-badge { font-family: var(--font-body); font-size: 0.65rem; letter-spacing: 0.15em; text-transform: uppercase; padding: 0.7rem 1.5rem; border-radius: var(--radius); background: hsl(348 20% 66% / 0.15); color: var(--accent); border: 1px solid hsl(348 20% 66% / 0.3); }
+    /* ─── SVG Icons (inline) ─── */
+    .icon { display: inline-block; vertical-align: middle; }
+    /* ─── Responsive tweaks ─── */
+    @media (max-width: 640px) {
+      .poems-grid { grid-template-columns: 1fr; }
+      .nav-cards   { grid-template-columns: 1fr 1fr; }
+      .poem-nav-buttons { flex-direction: column; align-items: center; }
+    }
+    @media (max-width: 400px) {
+      .nav-cards { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+<!-- ════════════════════════════════════════
+     NAVIGATION
+════════════════════════════════════════ -->
+<nav id="navbar">
+  <div class="nav-inner">
+    <a href="#" class="nav-brand" onclick="navigate('home')">The Inner Atlas</a>
+    <div class="nav-links">
+      <a class="nav-link" onclick="navigate('poems')">Poems</a>
+      <a class="nav-link" onclick="navigate('journal')">Journal</a>
+      <a class="nav-link" onclick="navigate('daily-question')">Daily Question</a>
+      <a class="nav-link" onclick="navigate('meaning-builder')">Meaning Builder</a>
+      <a class="nav-link" onclick="navigate('about')">About</a>
+      <a class="nav-link" onclick="navigate('admin')" style="opacity:0.5">Admin</a>
+    </div>
+    <button class="nav-hamburger" onclick="toggleMobileMenu()" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+  <div class="mobile-menu" id="mobile-menu">
+    <a onclick="navigate('poems');toggleMobileMenu()">Poems</a>
+    <a onclick="navigate('journal');toggleMobileMenu()">Journal</a>
+    <a onclick="navigate('daily-question');toggleMobileMenu()">Daily Question</a>
+    <a onclick="navigate('meaning-builder');toggleMobileMenu()">Meaning Builder</a>
+    <a onclick="navigate('about');toggleMobileMenu()">About</a>
+    <a onclick="navigate('admin');toggleMobileMenu()">Admin</a>
+  </div>
+</nav>
+<!-- ════════════════════════════════════════
+     PAGE: HOME
+════════════════════════════════════════ -->
+<div id="page-home" class="page active">
+  <section class="hero">
+    <div class="hero-bg"></div>
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+      <p style="font-family:var(--font-body);font-size:0.65rem;letter-spacing:0.3em;text-transform:uppercase;color:var(--muted-fg);margin-bottom:2rem;">A quiet place</p>
+      <h1 class="hero-title">The Inner Atlas</h1>
+      <div class="divider" style="margin-bottom:2rem;"></div>
+      <p class="hero-intro">
+        Welcome to the quiet place inside me —<br>
+        a landscape of poems, questions, and shifting light.
+      </p>
+      <p class="hero-sub">
+        Here, language is a doorway.<br>
+        Here, you are allowed to feel.
+      </p>
+      <a class="btn btn-outline" onclick="navigate('poems')" style="border-color:hsl(220 20% 16% / 0.3);color:var(--foreground);padding:0.875rem 2rem;">Enter the poems</a>
+    </div>
+    <div class="hero-scroll"><div class="hero-scroll-line"></div></div>
+  </section>
+  <section class="container" style="padding-bottom:4rem;">
+    <p style="font-family:var(--font-body);font-size:0.65rem;letter-spacing:0.3em;text-transform:uppercase;color:var(--muted-fg);text-align:center;padding-top:4rem;margin-bottom:1rem;">Explore</p>
+    <div class="nav-cards" id="home-nav-cards"></div>
+  </section>
+  <footer>
+    <div class="footer-inner">
+      <p class="font-display italic text-muted" style="font-size:0.875rem;">The Inner Atlas — a quiet place for honest words.</p>
+      <div class="footer-links">
+        <a class="footer-link" onclick="navigate('poems')">Poems</a>
+        <a class="footer-link" onclick="navigate('journal')">Journal</a>
+        <a class="footer-link" onclick="navigate('about')">About</a>
+      </div>
+    </div>
+  </footer>
+</div>
+<!-- ════════════════════════════════════════
+     PAGE: POEMS
+════════════════════════════════════════ -->
+<div id="page-poems" class="page">
+  <main class="container-md main-pad">
+    <header class="page-header">
+      <span class="page-eyebrow">The collection</span>
+      <h1 class="page-title">Poems</h1>
+      <div class="divider" style="margin-bottom:1.5rem;"></div>
+      <p class="page-sub">Each poem is a door. Enter slowly.</p>
+    </header>
+    <div class="tag-bar" id="poems-tag-bar"></div>
+    <div class="poems-grid" id="poems-grid"></div>
+  </main>
+  <footer>
+    <div class="footer-inner">
+      <p class="font-display italic text-muted" style="font-size:0.875rem;">The Inner Atlas — a quiet place for honest words.</p>
+      <div class="footer-links">
+        <a class="footer-link" onclick="navigate('poems')">Poems</a>
+        <a class="footer-link" onclick="navigate('journal')">Journal</a>
+        <a class="footer-link" onclick="navigate('about')">About</a>
+      </div>
+    </div>
+  </footer>
+</div>
+<!-- ════════════════════════════════════════
+     PAGE: POEM DETAIL
+════════════════════════════════════════ -->
+<div id="page-poem-detail" class="page">
+  <main class="container-sm main-pad">
+    <div style="text-align:center;margin-bottom:3rem;">
+      <button class="btn btn-ghost" onclick="navigate('poems')" style="font-size:0.65rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted-fg);">← Back to poems</button>
+    </div>
+    <article>
+      <header class="poem-detail-header">
+        <h1 class="poem-detail-title" id="detail-title"></h1>
+        <p class="poem-detail-meta" id="detail-meta"></p>
+        <div class="divider" style="margin-top:1.25rem;"></div>
+      </header>
+      <div class="poem-detail-body" id="detail-body"></div>
+      <div id="detail-tags" style="display:flex;flex-wrap:wrap;gap:0.5rem;justify-content:center;margin-bottom:2rem;"></div>
+    </article>
+    <div class="poem-nav-buttons" id="detail-nav"></div>
+  </main>
+  <footer>
+    <div class="footer-inner">
+      <p class="font-display italic text-muted" style="font-size:0.875rem;">The Inner Atlas — a quiet place for honest words.</p>
+      <div class="footer-links">
+        <a class="footer-link" onclick="navigate('poems')">Poems</a>
+        <a class="footer-link" onclick="navigate('journal')">Journal</a>
+        <a class="footer-link" onclick="navigate('about')">About</a>
+      </div>
+    </div>
+  </footer>
+</div>
+<!-- ════════════════════════════════════════
+     PAGE: JOURNAL
+════════════════════════════════════════ -->
+<div id="page-journal" class="page">
+  <main class="container-sm main-pad">
+    <header class="page-header">
+      <span class="page-eyebrow">Inner landscape</span>
+      <h1 class="page-title">Emotional Journal</h1>
+      <div class="divider" style="margin-bottom:1.5rem;"></div>
+      <p class="page-sub">You don't have to name what you feel.<br>Just describe the weather inside you.</p>
+    </header>
+    <div style="margin-bottom:4rem;">
+      <div class="journal-textarea-wrap">
+        <textarea class="journal-textarea" id="journal-input" rows="4" placeholder="Today feels like…"></textarea>
+        <div class="journal-footer">
+          <span class="journal-hint">⌘ + Enter to submit</span>
+          <button class="btn btn-dark" id="journal-submit-btn" onclick="submitJournalEntry()" disabled>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+            Release
+          </button>
+        </div>
+      </div>
+    </div>
+    <div id="journal-entries-section" style="display:none;">
+      <p style="font-family:var(--font-body);font-size:0.65rem;letter-spacing:0.3em;text-transform:uppercase;color:var(--muted-fg);text-align:center;margin-bottom:2rem;">What you've released</p>
+      <div id="journal-entries-list"></div>
+    </div>
+  </main>
+  <footer>
+    <div class="footer-inner">
+      <p class="font-display italic text-muted" style="font-size:0.875rem;">The Inner Atlas — a quiet place for honest words.</p>
+      <div class="footer-links">
+        <a class="footer-link" onclick="navigate('poems')">Poems</a>
+        <a class="footer-link" onclick="navigate('journal')">Journal</a>
+        <a class="footer-link" onclick="navigate('about')">About</a>
+      </div>
+    </div>
+  </footer>
+</div>
+<!-- ════════════════════════════════════════
+     PAGE: DAILY QUESTION
+════════════════════════════════════════ -->
+<div id="page-daily-question" class="page">
+  <main class="container-sm main-pad">
+    <header class="page-header">
+      <span class="page-eyebrow">Today's invitation</span>
+      <h1 class="page-title">Daily Question</h1>
+      <div class="divider" style="margin-bottom:1.5rem;"></div>
+      <p class="page-sub">One question to sit with. Let it breathe before you answer.</p>
+    </header>
+    <div class="question-card-wrap">
+      <div class="question-ornament-tl">
+        <span style="font-family:var(--font-display);color:var(--accent);font-size:0.875rem;">?</span>
+      </div>
+      <div class="question-card" id="question-card">
+        <p class="question-text" id="question-text"></p>
+      </div>
+      <div class="question-ornament-br"></div>
+    </div>
+    <div style="display:flex;justify-content:center;">
+      <button class="btn btn-outline" onclick="generateNewQuestion()" id="new-question-btn">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon" id="refresh-icon"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+        Another question
+      </button>
+    </div>
+    <div style="text-align:center;margin-top:6rem;">
+      <p class="font-display italic" style="color:hsl(220 12% 48% / 0.6);font-size:0.875rem;">
+        You don't have to answer. Sometimes just holding the question is enough.
+      </p>
+    </div>
+  </main>
+  <footer>
+    <div class="footer-inner">
+      <p class="font-display italic text-muted" style="font-size:0.875rem;">The Inner Atlas — a quiet place for honest words.</p>
+      <div class="footer-links">
+        <a class="footer-link" onclick="navigate('poems')">Poems</a>
+        <a class="footer-link" onclick="navigate('journal')">Journal</a>
+        <a class="footer-link" onclick="navigate('about')">About</a>
+      </div>
+    </div>
+  </footer>
+</div>
+<!-- ════════════════════════════════════════
+     PAGE: MEANING BUILDER
+════════════════════════════════════════ -->
+<div id="page-meaning-builder" class="page">
+  <main class="container-sm main-pad">
+    <header class="page-header">
+      <span class="page-eyebrow">Your vocabulary</span>
+      <h1 class="page-title">Meaning Builder</h1>
+      <div class="divider" style="margin-bottom:1.5rem;"></div>
+      <p class="page-sub">Choose a concept. Write your own truth about it.<br>No dictionary can hold what you mean.</p>
+    </header>
+    <div style="margin-bottom:2rem;">
+      <p class="form-label" style="margin-bottom:1rem;">I want to define</p>
+      <div class="concept-grid" id="concept-grid"></div>
+    </div>
+    <div style="margin-bottom:2.5rem;">
+      <div class="card" style="padding:1.5rem;transition:border-color 0.3s;" id="meaning-card">
+        <label class="definition-label">
+          <span style="font-style:italic;color:var(--accent);" id="meaning-label-concept">Love</span> is…
+        </label>
+        <textarea class="field field-display" id="meaning-input" rows="5" placeholder="…what you have always known but never said." style="border:none;padding:0;font-size:1.125rem;"></textarea>
+        <div style="display:flex;justify-content:flex-end;margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border);">
+          <button class="btn btn-dark" id="meaning-save-btn" onclick="saveMeaning()" disabled>Save definition</button>
+        </div>
+      </div>
+    </div>
+    <div id="meanings-section" style="display:none;">
+      <p style="font-family:var(--font-body);font-size:0.65rem;letter-spacing:0.3em;text-transform:uppercase;color:var(--muted-fg);text-align:center;margin-bottom:2rem;">Your definitions</p>
+      <div id="meanings-list"></div>
+    </div>
+  </main>
+  <footer>
+    <div class="footer-inner">
+      <p class="font-display italic text-muted" style="font-size:0.875rem;">The Inner Atlas — a quiet place for honest words.</p>
+      <div class="footer-links">
+        <a class="footer-link" onclick="navigate('poems')">Poems</a>
+        <a class="footer-link" onclick="navigate('journal')">Journal</a>
+        <a class="footer-link" onclick="navigate('about')">About</a>
+      </div>
+    </div>
+  </footer>
+</div>
+<!-- ════════════════════════════════════════
+     PAGE: ABOUT
+════════════════════════════════════════ -->
+<div id="page-about" class="page">
+  <main class="container-sm main-pad">
+    <header class="page-header">
+      <span class="page-eyebrow">On the writer</span>
+      <h1 class="page-title">About</h1>
+      <div class="divider"></div>
+    </header>
+    <div class="about-avatar"><span>ia</span></div>
+    <div style="text-align:center;margin-bottom:2rem;">
+      <p class="font-display italic" style="font-size:1.25rem;color:var(--foreground);line-height:1.7;">
+        I write to understand the parts of myself<br>that don't speak plainly.
+      </p>
+    </div>
+    <div class="divider-border" style="margin-bottom:1.5rem;"></div>
+    <div style="max-width:540px;margin:0 auto;">
+      <p class="about-text">My poems are fragments of longing, clarity, confusion, and small moments of truth. This space is where I gather them — not to impress, but to witness.</p>
+      <p class="about-text">I believe language is one of the few tools we have for the impossible work of understanding ourselves. Every poem I write is an attempt to translate something that lived silently in me into something that can be seen, held, shared.</p>
+      <p class="about-text">This site is a sanctuary — for me, and for anyone who needs a quiet place to breathe. You are welcome here.</p>
+    </div>
+    <div class="divider-border" style="margin:1.5rem auto;"></div>
+    <p class="about-quote">"Here, language is a doorway. Here, you are allowed to feel."</p>
+    <div style="margin-top:4rem;padding-top:2.5rem;border-top:1px solid var(--border);text-align:center;">
+      <span class="page-eyebrow" style="margin-bottom:1rem;">Reach out</span>
+      <p class="font-display italic" style="color:var(--muted-fg);font-size:0.875rem;line-height:1.8;">
+        If a poem moved something in you, I'd love to know.<br>
+        You can find me at <a href="mailto:amosr834@gmail.com" style="color:var(--primary);text-decoration:underline;text-underline-offset:4px;">amosr834@gmail.com</a>
+      </p>
+    </div>
+  </main>
+  <footer>
+    <div class="footer-inner">
+      <p class="font-display italic text-muted" style="font-size:0.875rem;">The Inner Atlas — a quiet place for honest words.</p>
+      <div class="footer-links">
+        <a class="footer-link" onclick="navigate('poems')">Poems</a>
+        <a class="footer-link" onclick="navigate('journal')">Journal</a>
+        <a class="footer-link" onclick="navigate('about')">About</a>
+      </div>
+    </div>
+  </footer>
+</div>
+<!-- ════════════════════════════════════════
+     PAGE: ADMIN
+════════════════════════════════════════ -->
+<div id="page-admin" class="page">
+  <!-- login screen -->
+  <div id="admin-login-screen" class="admin-login">
+    <div class="admin-login-box">
+      <div style="text-align:center;margin-bottom:2.5rem;">
+        <h1 style="font-family:var(--font-display);font-size:2.5rem;font-weight:300;margin-bottom:0.5rem;">Admin</h1>
+        <p class="font-display italic text-muted" style="font-size:0.875rem;">The Inner Atlas</p>
+      </div>
+      <form onsubmit="adminLogin(event)">
+        <div style="margin-bottom:1.25rem;">
+          <input type="password" id="admin-password-input" class="field" placeholder="Password" autocomplete="current-password" />
+        </div>
+        <p id="admin-login-error" class="error-msg" style="display:none;margin-bottom:0.75rem;">Incorrect password.</p>
+        <button type="submit" class="btn btn-dark" style="width:100%;justify-content:center;">Enter</button>
+      </form>
+    </div>
+  </div>
+  <!-- dashboard -->
+  <div id="admin-dashboard" style="display:none;">
+    <main class="container-md main-pad">
+      <div class="admin-row">
+        <div>
+          <h1 style="font-family:var(--font-display);font-size:2.5rem;font-weight:300;">Admin</h1>
+          <p id="admin-poem-count" class="font-display italic text-muted" style="font-size:0.875rem;margin-top:0.25rem;"></p>
+        </div>
+        <div style="display:flex;gap:0.75rem;align-items:center;">
+          <button class="btn btn-dark" onclick="showPoemForm('add')">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            New poem
+          </button>
+          <button class="btn btn-ghost btn-outline" onclick="adminLogout()" title="Logout" style="padding:0.6rem;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          </button>
+        </div>
+      </div>
+      <div id="admin-poems-list"></div>
+    </main>
+  </div>
+  <!-- poem form -->
+  <div id="admin-poem-form" style="display:none;">
+    <main class="container-sm main-pad">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:2.5rem;">
+        <h1 id="form-title" style="font-family:var(--font-display);font-size:2rem;font-weight:300;"></h1>
+        <button class="btn btn-ghost" onclick="showDashboard()" style="color:var(--muted-fg);">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Title</label>
+        <input id="form-poem-title" class="field field-display" placeholder="Poem title" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Date</label>
+        <input id="form-poem-date" type="date" class="field" style="width:auto;" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Poem body</label>
+        <textarea id="form-poem-body" class="field field-display" rows="14" placeholder="Your poem here…&#10;&#10;Line breaks are preserved." style="font-size:1rem;line-height:1.9;"></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Tags</label>
+        <div class="tags-row" id="form-tags-row"></div>
+        <div class="tag-input-row">
+          <input id="form-tag-input" class="field" placeholder="Add a tag…" style="flex:1;" onkeydown="if(event.key==='Enter'){event.preventDefault();addFormTag();}" />
+          <button class="btn btn-outline" onclick="addFormTag()">Add</button>
+        </div>
+      </div>
+      <div class="form-group">
+        <button id="form-draft-toggle" class="draft-toggle" onclick="toggleFormDraft()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon" id="draft-icon"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          <span id="draft-label">Published (visible)</span>
+        </button>
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-dark" id="form-save-btn" onclick="savePoem()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+          Save poem
+        </button>
+        <button class="btn btn-outline" onclick="showDashboard()">Cancel</button>
+      </div>
+    </main>
+  </div>
+</div>
+<script>
+/* ════════════════════════════════════════
+   DATA — DEFAULT POEMS
+════════════════════════════════════════ */
+const DEFAULT_POEMS = [
+  {
+    id: "poem-1", title: "The Hours Before Dawn", date: "2024-01-15",
+    tags: ["longing","night","silence"], draft: false,
+    body: `There is a kind of silence\nthat knows your name —\nit arrives before the birds,\nbefore the world remembers\nhow to speak.\n\nI have learned to sit with it.\nTo let it press its palms\nagainst my chest\nand feel for what is hollow,\nwhat is full.\n\nIn the hours before dawn\nI am no one's version of myself.\nJust a body with a heartbeat\nand a list of things\nI haven't said.`
+  },
+  {
+    id: "poem-2", title: "Cartography of the Self", date: "2024-02-03",
+    tags: ["self","journey","discovery"], draft: false,
+    body: `I have been trying to map myself\nfor years —\ndrawing borders where I end\nand you begin,\nmarking the territories of grief\nin fading ink.\n\nBut the map keeps changing.\nRivers appear where there was stone.\nOld cities dissolve into open fields.\n\nPerhaps the point\nwas never to arrive\nbut to learn the shape\nof the journey itself —\nthe long valleys,\nthe sudden hills,\nthe places I keep returning to\nwithout knowing why.`
+  },
+  {
+    id: "poem-3", title: "What the River Knows", date: "2024-03-22",
+    tags: ["letting go","peace","water"], draft: false,
+    body: `The river does not mourn\nwhat it has carried.\n\nYesterday's leaves, last year's rain,\nthe names people threw in\non bridges at midnight —\nit holds them all\njust long enough\nto let them go.\n\nI want to be like that.\nTo feel everything fully\nand then open my hands.\nTo know that holding on\nis not the same as loving.\n\nThe river knows this.\nIt has been practicing\nsince before we had words\nfor what we lose.`
+  },
+  {
+    id: "poem-4", title: "Threshold", date: "2024-05-10",
+    tags: ["courage","change","becoming"], draft: false,
+    body: `I have been standing\nat the edge of myself\nfor a long time now.\n\nOne foot in the familiar dark,\none reaching toward\nsomething I can't name —\nsome version of me\nthat is braver, quieter, more whole.\n\nThe doorway is not a place.\nIt lives in the moment\njust before you decide —\nwhen everything is still possible\nand nothing has been risked.\n\nI am learning to love the threshold.\nTo stop waiting for permission\nto cross.`
+  },
+  {
+    id: "poem-5", title: "Small Inheritance", date: "2024-07-18",
+    tags: ["memory","family","tenderness"], draft: false,
+    body: `My mother taught me\nto keep things.\nOld letters, broken clocks,\nthe names of flowers.\n\nShe taught me that beauty\nlives in small containers —\na cup of morning light,\nthe way rain sounds\non a roof you know.\n\nI carry all of it:\nher patience, her silences,\nthe particular way she looked\nat the sky before a storm\nas if she was reading something\nonly she could understand.\n\nThis is what it means\nto inherit a soul.\nNot the grand gestures —\nthe small, daily ache\nof being human together.`
+  }
+];
+const DAILY_QUESTIONS = [
+  "What part of you is still unfinished?",
+  "Where does your peace come from?",
+  "What truth are you avoiding?",
+  "What would you do if no one was watching?",
+  "Which feeling have you been carrying the longest?",
+  "What does your body know that your mind refuses?",
+  "Who are you when you are completely alone?",
+  "What are you still waiting for permission to do?",
+  "What would you grieve if it disappeared tomorrow?",
+  "Where in the world do you feel most like yourself?",
+  "What question do you keep returning to?",
+  "What are you afraid of becoming?",
+  "What part of your past are you still living in?",
+  "What would you say to the version of you from five years ago?",
+  "What does love ask of you right now?",
+  "What are you protecting, and does it still need protecting?",
+  "What do you know about yourself that you don't often say aloud?",
+  "What small thing brings you back to yourself?",
+  "Where do you feel the most resistance, and what is it guarding?",
+  "What does silence feel like inside you today?",
+  "What are you in the middle of becoming?",
+  "What would it feel like to forgive yourself?",
+  "What are you hungry for that has nothing to do with food?",
+  "What do you wish someone had told you earlier?",
+  "What is your relationship with stillness?",
+  "Where in your life are you being dishonest, even gently?",
+  "What does your loneliness look like?",
+  "What part of you needs more space?",
+  "What have you outgrown that you're still holding?",
+  "What would you do with more courage?",
+  "What does your most tender self need today?"
+];
+const CONCEPTS = ["Love","Home","Peace","Grief","Hope","Silence","Hunger","Purpose","Trust","Becoming","Memory","Freedom","Belonging","Forgiveness","Courage"];
+const JOURNAL_PROMPTS = ["Today feels like…","The river inside me is…","My chest feels like…","Something inside me is…","Right now I feel as if…","I am carrying something that feels like…"];
+const ADMIN_PASSWORD = "atlas";
+const POEMS_KEY    = "inner-atlas-poems";
+const JOURNAL_KEY  = "inner-atlas-journal";
+const MEANINGS_KEY = "inner-atlas-definitions";
+/* ════════════════════════════════════════
+   STORAGE HELPERS
+════════════════════════════════════════ */
+function getPoems() {
+  try {
+    const s = localStorage.getItem(POEMS_KEY);
+    if (s) return JSON.parse(s);
+  } catch {}
+  localStorage.setItem(POEMS_KEY, JSON.stringify(DEFAULT_POEMS));
+  return DEFAULT_POEMS;
+}
+function savePoems(poems) { localStorage.setItem(POEMS_KEY, JSON.stringify(poems)); }
+function getJournalEntries() { try { return JSON.parse(localStorage.getItem(JOURNAL_KEY)||"[]"); } catch { return []; } }
+function saveJournalEntries(e) { localStorage.setItem(JOURNAL_KEY, JSON.stringify(e)); }
+function getMeanings() { try { return JSON.parse(localStorage.getItem(MEANINGS_KEY)||"[]"); } catch { return []; } }
+function saveMeanings(m) { localStorage.setItem(MEANINGS_KEY, JSON.stringify(m)); }
+function genId() { return Date.now().toString(36) + Math.random().toString(36).slice(2); }
+function fmtDate(iso) { try { return new Date(iso).toLocaleDateString("en-US",{month:"long",day:"numeric",year:"numeric"}); } catch { return iso; } }
+/* ════════════════════════════════════════
+   ROUTING
+════════════════════════════════════════ */
+let currentPage = "home";
+let currentPoemId = null;
+function navigate(page, poemId) {
+  // hide all pages
+  document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+  // update nav active state
+  document.querySelectorAll(".nav-link").forEach(l => l.classList.remove("active-link"));
+  currentPage = page;
+  if (page === "poem-detail") {
+    currentPoemId = poemId;
+    renderPoemDetail(poemId);
+    document.getElementById("page-poem-detail").classList.add("active");
+    window.scrollTo(0,0);
+    return;
+  }
+  if (page === "admin") {
+    renderAdmin();
+    document.getElementById("page-admin").classList.add("active");
+    window.scrollTo(0,0);
+    return;
+  }
+  const pageEl = document.getElementById("page-" + page);
+  if (!pageEl) return;
+  pageEl.classList.add("active");
+  window.scrollTo(0,0);
+  // render page-specific content
+  const renders = {
+    poems: renderPoems,
+    journal: renderJournal,
+    "daily-question": renderDailyQuestion,
+    "meaning-builder": renderMeaningBuilder,
+    home: renderHome
+  };
+  if (renders[page]) renders[page]();
+}
+function toggleMobileMenu() {
+  const m = document.getElementById("mobile-menu");
+  m.classList.toggle("open");
+}
+/* ════════════════════════════════════════
+   HOME
+════════════════════════════════════════ */
+const NAV_CARDS = [
+  { page:"poems",           label:"Poems",           desc:"A library of language and longing.", symbol:"✦" },
+  { page:"journal",         label:"Emotional Journal",desc:"Write what words barely hold.",     symbol:"◇" },
+  { page:"daily-question",  label:"Daily Question",  desc:"One question to sit with today.",    symbol:"○" },
+  { page:"meaning-builder", label:"Meaning Builder", desc:"Define what matters to you.",        symbol:"△" }
+];
+function renderHome() {
+  const grid = document.getElementById("home-nav-cards");
+  if (!grid || grid.dataset.rendered) return;
+  grid.dataset.rendered = "1";
+  grid.innerHTML = NAV_CARDS.map(c => `
+    <div class="nav-card" onclick="navigate('${c.page}')">
+      <div class="nav-card-symbol">${c.symbol}</div>
+      <h3 class="nav-card-title">${c.label}</h3>
+      <p class="nav-card-desc">${c.desc}</p>
+    </div>`).join("");
+}
+/* ════════════════════════════════════════
+   POEMS
+════════════════════════════════════════ */
+let activeTag = null;
+function renderPoems() {
+  const poems = getPoems().filter(p => !p.draft);
+  const allTags = [...new Set(poems.flatMap(p => p.tags))];
+  // tag bar
+  const tagBar = document.getElementById("poems-tag-bar");
+  tagBar.innerHTML = `<button class="tag ${activeTag===null?'active':''}" onclick="filterByTag(null)">All</button>` +
+    allTags.map(t => `<button class="tag ${activeTag===t?'active':''}" onclick="filterByTag('${t}')">${t}</button>`).join("");
+  // grid
+  const filtered = activeTag ? poems.filter(p => p.tags.includes(activeTag)) : poems;
+  const grid = document.getElementById("poems-grid");
+  if (filtered.length === 0) {
+    grid.innerHTML = `<div style="text-align:center;padding:5rem 0;grid-column:1/-1;"><p class="font-display italic text-muted" style="font-size:1.125rem;">No poems found. Check back soon.</p></div>`;
+    return;
+  }
+  grid.innerHTML = filtered.map(p => `
+    <div class="poem-card" onclick="navigate('poem-detail','${p.id}')">
+      <h3 class="poem-card-title">${p.title}</h3>
+      <p class="poem-card-date">${fmtDate(p.date)}</p>
+      <p class="poem-card-excerpt">${p.body.replace(/\n/g," ")}</p>
+      ${p.tags.length ? `<div class="poem-card-tags">${p.tags.map(t=>`<span class="poem-tag-pill">${t}</span>`).join("")}</div>` : ""}
+      <p class="poem-read-hint">Read poem →</p>
+    </div>`).join("");
+}
+function filterByTag(tag) {
+  activeTag = tag;
+  renderPoems();
+}
+/* ════════════════════════════════════════
+   POEM DETAIL
+════════════════════════════════════════ */
+function renderPoemDetail(id) {
+  const poems = getPoems().filter(p => !p.draft);
+  const idx = poems.findIndex(p => p.id === id);
+  if (idx === -1) { navigate("poems"); return; }
+  const poem = poems[idx];
+  document.getElementById("detail-title").textContent = poem.title;
+  document.getElementById("detail-meta").textContent = fmtDate(poem.date) + (poem.tags.length ? " · " + poem.tags.join(", ") : "");
+  document.getElementById("detail-body").textContent = poem.body;
+  // tags
+  document.getElementById("detail-tags").innerHTML = poem.tags.map(t => `<span class="poem-tag-pill">${t}</span>`).join("");
+  // prev / next
+  const nav = document.getElementById("detail-nav");
+  nav.innerHTML = "";
+  if (idx > 0) {
+    const btn = document.createElement("button");
+    btn.className = "btn btn-outline";
+    btn.innerHTML = "← " + poems[idx-1].title;
+    btn.onclick = () => navigate("poem-detail", poems[idx-1].id);
+    nav.appendChild(btn);
+  }
+  if (idx < poems.length - 1) {
+    const btn = document.createElement("button");
+    btn.className = "btn btn-outline";
+    btn.innerHTML = poems[idx+1].title + " →";
+    btn.onclick = () => navigate("poem-detail", poems[idx+1].id);
+    nav.appendChild(btn);
+  }
+}
+/* ════════════════════════════════════════
+   JOURNAL
+════════════════════════════════════════ */
+function renderJournal() {
+  const idx = Math.floor(Date.now() / (1000*60*60*6)) % JOURNAL_PROMPTS.length;
+  document.getElementById("journal-input").placeholder = JOURNAL_PROMPTS[idx];
+  document.getElementById("journal-input").value = "";
+  document.getElementById("journal-submit-btn").disabled = true;
+  renderJournalEntries();
+}
+function renderJournalEntries() {
+  const entries = getJournalEntries();
+  const section = document.getElementById("journal-entries-section");
+  const list = document.getElementById("journal-entries-list");
+  if (entries.length === 0) { section.style.display = "none"; return; }
+  section.style.display = "block";
+  list.innerHTML = entries.map(e => `
+    <div class="entry-card">
+      <p class="entry-text">"${e.text}"</p>
+      <p class="entry-date">${new Date(e.ts).toLocaleDateString("en-US",{month:"long",day:"numeric",year:"numeric",hour:"2-digit",minute:"2-digit"})}</p>
+    </div>`).join("");
+}
+document.getElementById("journal-input").addEventListener("input", function() {
+  document.getElementById("journal-submit-btn").disabled = !this.value.trim();
+});
+document.getElementById("journal-input").addEventListener("keydown", function(e) {
+  if (e.key === "Enter" && e.metaKey) submitJournalEntry();
+});
+function submitJournalEntry() {
+  const input = document.getElementById("journal-input");
+  if (!input.value.trim()) return;
+  const entries = getJournalEntries();
+  entries.unshift({ id: genId(), text: input.value.trim(), ts: new Date().toISOString() });
+  saveJournalEntries(entries);
+  input.value = "";
+  document.getElementById("journal-submit-btn").disabled = true;
+  renderJournalEntries();
+}
+/* ════════════════════════════════════════
+   DAILY QUESTION
+════════════════════════════════════════ */
+let usedQuestionIndexes = new Set();
+function renderDailyQuestion() {
+  const dayIdx = Math.floor(Date.now() / (1000*60*60*24));
+  const q = DAILY_QUESTIONS[dayIdx % DAILY_QUESTIONS.length];
+  document.getElementById("question-text").textContent = q;
+}
+function generateNewQuestion() {
+  const card = document.getElementById("question-card");
+  const btn = document.getElementById("new-question-btn");
+  card.style.opacity = "0";
+  btn.disabled = true;
+  setTimeout(() => {
+    let idx;
+    do { idx = Math.floor(Math.random() * DAILY_QUESTIONS.length); }
+    while (usedQuestionIndexes.has(idx) && usedQuestionIndexes.size < DAILY_QUESTIONS.length);
+    usedQuestionIndexes.add(idx);
+    document.getElementById("question-text").textContent = DAILY_QUESTIONS[idx];
+    card.style.opacity = "1";
+    btn.disabled = false;
+  }, 380);
+}
+/* ════════════════════════════════════════
+   MEANING BUILDER
+════════════════════════════════════════ */
+let selectedConcept = "Love";
+function renderMeaningBuilder() {
+  // concept grid
+  const grid = document.getElementById("concept-grid");
+  grid.innerHTML = CONCEPTS.map(c => `
+    <button class="concept-btn ${c===selectedConcept?'selected':''}" onclick="selectConcept('${c}')">${c}</button>`).join("");
+  document.getElementById("meaning-label-concept").textContent = selectedConcept;
+  document.getElementById("meaning-input").value = "";
+  document.getElementById("meaning-save-btn").disabled = true;
+  renderMeaningsList();
+}
+function selectConcept(c) {
+  selectedConcept = c;
+  document.querySelectorAll(".concept-btn").forEach(b => b.classList.toggle("selected", b.textContent===c));
+  document.getElementById("meaning-label-concept").textContent = c;
+}
+document.getElementById("meaning-input").addEventListener("input", function() {
+  document.getElementById("meaning-save-btn").disabled = !this.value.trim();
+});
+function saveMeaning() {
+  const input = document.getElementById("meaning-input");
+  if (!input.value.trim()) return;
+  const meanings = getMeanings();
+  meanings.unshift({ id: genId(), concept: selectedConcept, text: input.value.trim(), ts: new Date().toISOString() });
+  saveMeanings(meanings);
+  const btn = document.getElementById("meaning-save-btn");
+  btn.textContent = "Saved ✓";
+  btn.classList.add("saved-badge");
+  input.value = "";
+  btn.disabled = true;
+  setTimeout(() => { btn.textContent = "Save definition"; btn.classList.remove("saved-badge"); }, 2000);
+  renderMeaningsList();
+}
+function renderMeaningsList() {
+  const meanings = getMeanings();
+  const section = document.getElementById("meanings-section");
+  const list = document.getElementById("meanings-list");
+  if (meanings.length === 0) { section.style.display = "none"; return; }
+  section.style.display = "block";
+  list.innerHTML = meanings.map(m => `
+    <div class="definition-card">
+      <div style="display:flex;align-items:start;justify-content:space-between;margin-bottom:0.75rem;">
+        <span class="definition-concept">${m.concept}</span>
+        <button onclick="exportMeaning('${m.id}')" title="Export" style="color:var(--muted-fg);cursor:pointer;background:none;border:none;padding:0;" onmouseover="this.style.color='var(--foreground)'" onmouseout="this.style.color='var(--muted-fg)'">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        </button>
+      </div>
+      <p class="definition-text">"${m.concept} is ${m.text}"</p>
+    </div>`).join("");
+}
+function exportMeaning(id) {
+  const m = getMeanings().find(x => x.id === id);
+  if (!m) return;
+  const blob = new Blob([`${m.concept}\n\n"${m.concept} is ${m.text}"\n\n— The Inner Atlas`], {type:"text/plain"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = m.concept.toLowerCase()+"-definition.txt"; a.click();
+  URL.revokeObjectURL(url);
+}
+/* ════════════════════════════════════════
+   ADMIN
+════════════════════════════════════════ */
+let adminEditingId = null;
+let formDraft = false;
+let formTags = [];
+function renderAdmin() {
+  const authed = sessionStorage.getItem("inner-atlas-admin") === "true";
+  document.getElementById("admin-login-screen").style.display = authed ? "none" : "flex";
+  document.getElementById("admin-dashboard").style.display    = authed ? "block" : "none";
+  document.getElementById("admin-poem-form").style.display    = "none";
+  if (authed) renderAdminDashboard();
+}
+function adminLogin(e) {
+  e.preventDefault();
+  const pw = document.getElementById("admin-password-input").value;
+  if (pw === ADMIN_PASSWORD) {
+    sessionStorage.setItem("inner-atlas-admin","true");
+    renderAdmin();
+  } else {
+    document.getElementById("admin-login-error").style.display = "block";
+  }
+}
+function adminLogout() {
+  sessionStorage.removeItem("inner-atlas-admin");
+  navigate("home");
+}
+function renderAdminDashboard() {
+  const poems = getPoems();
+  document.getElementById("admin-poem-count").textContent = `${poems.length} poem${poems.length!==1?"s":""} in the collection`;
+  const list = document.getElementById("admin-poems-list");
+  if (poems.length === 0) {
+    list.innerHTML = `<div style="text-align:center;padding:5rem 0;"><p class="font-display italic text-muted" style="font-size:1.125rem;">No poems yet. Add your first one.</p></div>`;
+    return;
+  }
+  list.innerHTML = poems.map(p => `
+    <div class="admin-poem-row" id="row-${p.id}">
+      <div class="admin-poem-info">
+        <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.25rem;">
+          <span class="admin-poem-title">${p.title}</span>
+          ${p.draft?`<span class="draft-pill">Draft</span>`:""}
+        </div>
+        <p class="admin-poem-meta">${fmtDate(p.date)}${p.tags.length?" · "+p.tags.join(", "):""}</p>
+      </div>
+      <div class="admin-poem-actions" id="actions-${p.id}">
+        <button onclick="showPoemForm('edit','${p.id}')" title="Edit" style="padding:0.5rem;color:var(--muted-fg);cursor:pointer;background:none;border:none;" onmouseover="this.style.color='var(--foreground)'" onmouseout="this.style.color='var(--muted-fg)'">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        </button>
+        <button onclick="confirmDelete('${p.id}')" title="Delete" id="del-btn-${p.id}" style="padding:0.5rem;color:var(--muted-fg);cursor:pointer;background:none;border:none;" onmouseover="this.style.color='var(--destructive)'" onmouseout="this.style.color='var(--muted-fg)'">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+        </button>
+      </div>
+    </div>`).join("");
+}
+function confirmDelete(id) {
+  const actionsEl = document.getElementById("actions-"+id);
+  actionsEl.innerHTML = `
+    <div class="delete-confirm">
+      <button class="btn-confirm" onclick="deletePoem('${id}')">Confirm</button>
+      <button class="btn-cancel-sm" onclick="renderAdminDashboard()">Cancel</button>
+    </div>`;
+}
+function deletePoem(id) {
+  const poems = getPoems().filter(p => p.id !== id);
+  savePoems(poems);
+  renderAdminDashboard();
+}
+function showDashboard() {
+  document.getElementById("admin-poem-form").style.display = "none";
+  document.getElementById("admin-dashboard").style.display = "block";
+  renderAdminDashboard();
+}
+function showPoemForm(mode, id) {
+  adminEditingId = id || null;
+  formTags = [];
+  formDraft = false;
+  if (mode === "edit" && id) {
+    const p = getPoems().find(x => x.id === id);
+    if (!p) return;
+    document.getElementById("form-poem-title").value = p.title;
+    document.getElementById("form-poem-date").value  = p.date;
+    document.getElementById("form-poem-body").value  = p.body;
+    formTags  = [...p.tags];
+    formDraft = !!p.draft;
+    document.getElementById("form-title").textContent = "Edit Poem";
+  } else {
+    document.getElementById("form-poem-title").value = "";
+    document.getElementById("form-poem-date").value  = new Date().toISOString().split("T")[0];
+    document.getElementById("form-poem-body").value  = "";
+    document.getElementById("form-title").textContent = "New Poem";
+  }
+  renderFormTags();
+  updateDraftToggle();
+  document.getElementById("admin-dashboard").style.display  = "none";
+  document.getElementById("admin-poem-form").style.display  = "block";
+  window.scrollTo(0,0);
+}
+function renderFormTags() {
+  document.getElementById("form-tags-row").innerHTML = formTags.map(t => `
+    <span class="tag-chip">
+      ${t}
+      <span class="tag-chip-remove" onclick="removeFormTag('${t}')">×</span>
+    </span>`).join("");
+}
+function addFormTag() {
+  const input = document.getElementById("form-tag-input");
+  const tag = input.value.trim().toLowerCase();
+  if (tag && !formTags.includes(tag)) { formTags.push(tag); renderFormTags(); }
+  input.value = "";
+}
+function removeFormTag(tag) {
+  formTags = formTags.filter(t => t !== tag);
+  renderFormTags();
+}
+function toggleFormDraft() {
+  formDraft = !formDraft;
+  updateDraftToggle();
+}
+function updateDraftToggle() {
+  const btn = document.getElementById("form-draft-toggle");
+  const lbl = document.getElementById("draft-label");
+  const ico = document.getElementById("draft-icon");
+  if (formDraft) {
+    btn.classList.add("is-draft");
+    lbl.textContent = "Draft (hidden)";
+    ico.innerHTML = `<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>`;
+  } else {
+    btn.classList.remove("is-draft");
+    lbl.textContent = "Published (visible)";
+    ico.innerHTML = `<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>`;
+  }
+}
+function savePoem() {
+  const title = document.getElementById("form-poem-title").value.trim();
+  const date  = document.getElementById("form-poem-date").value;
+  const body  = document.getElementById("form-poem-body").value.trim();
+  if (!title || !body) return;
+  const poems = getPoems();
+  if (adminEditingId) {
+    const idx = poems.findIndex(p => p.id === adminEditingId);
+    if (idx !== -1) poems[idx] = { ...poems[idx], title, date, body, tags: formTags, draft: formDraft };
+  } else {
+    poems.unshift({ id: genId(), title, date, body, tags: formTags, draft: formDraft });
+  }
+  savePoems(poems);
+  showDashboard();
+}
+/* ════════════════════════════════════════
+   INIT
+════════════════════════════════════════ */
+renderHome();
+renderDailyQuestion();
+renderMeaningBuilder();
+</script>
+</body>
+</html>
